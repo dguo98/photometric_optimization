@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("--input", type=str, required=True, help="input texture map")
     parser.add_argument("--tex_space_path", type=str, required=False, default="./data/FLAME_texture.npz", help="texture space path (.npz)")
     parser.add_argument("--tex_params", type=int, required=False, default=50, help="number of dimensions for optimization")  # todo(demi): double check
-    parser.add_argument("--imsize", type=int, required=False, default=256, help="image size")  # todo(demi): required? otherwise tex space path will need to change?
+    parser.add_argument("--imsize", type=int, required=False, default=512, help="image size")  # todo(demi): required? otherwise tex space path will need to change?
     parser.add_argument("--mode", type=str, required=False, default="dot_product", help="ways to get coefficients [dot_product, optim_l2]")
 
     # visualization
