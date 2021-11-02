@@ -247,20 +247,29 @@ def plot_kpts(image, kpts, color = 'r'):
                 c = (0, 255, 0)
             else:
                 c = (0, 0, 255)
-        image = cv2.circle(image,(st[0], st[1]), 1, c, 2)
+        try:
+            # HACK(demi): fix errors, adding int
+            image = cv2.circle(image,(int(st[0]), int(st[1])), 1, c, 2)
+        except:
+            print("failed cv2.circle(imge,(st[0],st[1]),1,c,2)")
+            from IPython import embed
+            embed()
         if i in end_list:
             continue
         ed = kpts[i + 1, :2]
-        image = cv2.line(image, (st[0], st[1]), (ed[0], ed[1]), (255, 255, 255), 1)
+        image = cv2.line(image, (int(st[0]), int(st[1])), (int(ed[0]), int(ed[1])), (255, 255, 255), 1)
 
     return image
 
 
-def save_obj(filename, vertices, faces, textures=None, uvcoords=None, uvfaces=None, texture_type='surface'):
+def save_obj(filename, vertices, faces, textures=None, uvcoords=None, uvfaces=None, texture_type='surface', texcode=None):
     assert vertices.ndimension() == 2
     assert faces.ndimension() == 2
     assert texture_type in ['surface', 'vertex']
     # assert texture_res >= 2
+    if texcode is not None:
+        texcode = texcode.detach().cpu().numpy()        
+        np.save(filename[:-4]+"_texcode.npy", texcode)
 
     if textures is not None and texture_type == 'surface':
         textures =textures.detach().cpu().numpy().transpose(1,2,0)

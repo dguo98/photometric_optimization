@@ -9,9 +9,11 @@ from glob import glob
 import time
 import datetime
 import imageio
-import arparse
+import argparse
 from tqdm import tqdm
 from scipy import linalg
+from skimage.io import imsave
+from IPython import embed
 
 sys.path.append('./models/')
 from FLAME import FLAME, FLAMETex
@@ -37,6 +39,7 @@ def get_coefficient(args, texture):
 
     if args.mode == "dot_product":
         # the basis is not actually orthonormal here
+        raise NotImplementedError
     elif args.mode == "linalg":
         texture = texture[:, [2,1,0], :,:]
         texture = texture.transpose(0,2,3,1)
@@ -53,7 +56,7 @@ def get_coefficient(args, texture):
         texture = texture.reshape(-1)
         texcode, residues, _, _ = linalg.lstsq(texture_basis, texture)
         assert texcode.shape == (args.tex_params,)
-        print("residues=", residues)
+        print("residues=", residues, " residuces avg=", residues/texture.shape[0])
         return texcode
     else:
         raise NotImplementedError
@@ -72,12 +75,14 @@ def visualize(args, tex_code):
     def viz(tex_code, filename):
         texture = texture_mean + (texture_basis*tex_code).sum(-1)
         texture = texture.reshape(512, 512, 3)
-        cv2.imsave(filename, texture)
+        texture = texture[:, :, [2,1,0]]
+        texture = np.clip(texture, 0, 255)
+        imsave(filename, texture)
 
     if not os.path.exists(args.output):
         os.makedirs(args.output)
 
-    viz(tex_code, f"{args.output}/default.png"))  
+    viz(tex_code, f"{args.output}/default.png") 
     for i in range(args.n_comp):
         tex_code[i] += args.vary
         viz(tex_code, f"{args.output}/vary_pos{i}.png")
@@ -106,7 +111,7 @@ if __name__ == "__main__":
     
     # main
     texture = convert_to_texture(args, args.input)
-    tex_code, texture_mean, texture_basis = get_coefficient(args, texture)
+    tex_code = get_coefficient(args, texture)
     visualize(args, tex_code)
 
     

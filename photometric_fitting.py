@@ -9,6 +9,8 @@ from glob import glob
 import time
 import datetime
 import imageio
+from tqdm import tqdm
+from IPython import embed
 
 sys.path.append('./models/')
 from FLAME import FLAME, FLAMETex
@@ -87,8 +89,11 @@ class PhotometricFitting(object):
                 grids = {}
                 visind = range(bz)  # [0]
                 grids['images'] = torchvision.utils.make_grid(images[visind]).detach().cpu()
-                grids['landmarks_gt'] = torchvision.utils.make_grid(
-                    util.tensor_vis_landmarks(images[visind], landmarks[visind]))
+                try:
+                    grids['landmarks_gt'] = torchvision.utils.make_grid(
+                        util.tensor_vis_landmarks(images[visind], landmarks[visind]))
+                except:
+                    pass
                 grids['landmarks2d'] = torchvision.utils.make_grid(
                     util.tensor_vis_landmarks(images[visind], landmarks2d[visind]))
                 grids['landmarks3d'] = torchvision.utils.make_grid(
@@ -218,8 +223,8 @@ class PhotometricFitting(object):
         single_params = self.optimize(images, landmarks, image_masks, savefolder)
         self.render.save_obj(filename=savefile[:-4]+'.obj',
                              vertices=torch.from_numpy(single_params['verts'][0]).to(self.device),
-                             textures=torch.from_numpy(single_params['albedos'][0]).to(self.device)
-                             )
+                             textures=torch.from_numpy(single_params['albedos'][0]).to(self.device),
+                             texcode=torch.from_numpy(single_params['tex'][0]).to(self.device))
         np.save(savefile, single_params)
 
 

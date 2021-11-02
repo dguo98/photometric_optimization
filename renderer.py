@@ -316,10 +316,10 @@ class Renderer(nn.Module):
 
         return uv_vertices
 
-    def save_obj(self, filename, vertices, textures):
+    def save_obj(self, filename, vertices, textures, texcode=None):
         '''
         vertices: [nv, 3], tensor
         texture: [3, h, w], tensor
         '''
         util.save_obj(filename, vertices, self.faces[0], textures=textures, uvcoords=self.raw_uvcoords[0],
-                          uvfaces=self.uvfaces[0])
+                          uvfaces=self.uvfaces[0],texcode=texcode)
