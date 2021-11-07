@@ -28,7 +28,17 @@ class PhotometricFitting(object):
         #
         self.flame = FLAME(self.config).to(self.device)
         self.flametex = FLAMETex(self.config).to(self.device)
-
+        
+        """
+        # HACK(demi): check texture difference
+        texcode = np.load("test_results/00000_texcode.npy")
+        texcode = torch.from_numpy(texcode).to(self.device).reshape(1, 50) 
+        o_texture, i_texture, s_texture = self.flametex(texcode,hack=True)
+        np.save("test_results/o_texture.npy", o_texture)
+        np.save("test_results/i_texture.npy", i_texture)
+        np.save("test_results/s_texture.npy", s_texture)
+        """
+        
         self._setup_renderer()
 
     def _setup_renderer(self):
@@ -194,6 +204,7 @@ class PhotometricFitting(object):
         image_mask_folder = './FFHQ_seg/'
         image_mask_path = os.path.sep.join([image_mask_folder, image_name + '.npy'])
 
+        print("imagepath=",imagepath)
         image = cv2.resize(cv2.imread(imagepath), (config.cropped_size, config.cropped_size)).astype(np.float32) / 255.
         image = image[:, :, [2, 1, 0]].transpose(2, 0, 1)
         images.append(torch.from_numpy(image[None, :, :, :]).to(self.device))
@@ -231,6 +242,10 @@ class PhotometricFitting(object):
 if __name__ == '__main__':
     image_name = str(sys.argv[1])
     device_name = str(sys.argv[2])
+    if len(sys.argv) > 3:
+        savefolder = str(sys.argv[3])
+    else:
+        savefolder = "./test_results_ft/"
     config = {
         # FLAME
         'flame_model_path': './data/generic_model.pkl',  # acquire it from FLAME project page
@@ -248,7 +263,7 @@ if __name__ == '__main__':
         'image_size': 224,
         'e_lr': 0.005,
         'e_wd': 0.0001,
-        'savefolder': './test_results/',
+        'savefolder': savefolder,
         # weights of losses and reg terms
         'w_pho': 8,
         'w_lmks': 1,
